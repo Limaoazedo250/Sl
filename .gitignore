@@ -1,33 +1,43 @@
-# Gradle files
-.gradle/
-build/
+By fv44523
+local player = game.Players.LocalPlayer
 
-# Local configuration file (sdk path, etc)
-local.properties
+local function createESP(targetPlayer)
+    -- Verifique se o player tem um modelo válido
+    if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return
+    end
 
-# Log/OS Files
-*.log
+    -- Criar uma parte que será usada para exibir o ESP
+    local espPart = Instance.new("BillboardGui")
+    espPart.Adornee = targetPlayer.Character.HumanoidRootPart
+    espPart.Size = UDim2.new(0, 200, 0, 50) -- Ajustar o tamanho
+    espPart.StudsOffset = Vector3.new(0, 3, 0) -- Ajustar a distância vertical
+    espPart.AlwaysOnTop = true
+    espPart.Parent = game.CoreGui
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.apk
-output.json
+    -- Criar o texto do ESP (nome do jogador)
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Cor do texto
+    textLabel.TextStrokeTransparency = 0.8
+    textLabel.Text = targetPlayer.Name
+    textLabel.Parent = espPart
+end
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+-- Atualizar ESP para todos os jogadores no jogo
+game.Players.PlayerAdded:Connect(function(targetPlayer)
+    if targetPlayer ~= player then  -- Não exibe ESP para o jogador local
+        createESP(targetPlayer)
+    end
+end)
 
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
+-- Remover ESP quando o jogador sair
+game.Players.PlayerRemoving:Connect(function(targetPlayer)
+    if targetPlayer ~= player then
+        local espPart = game.CoreGui:FindFirstChild(targetPlayer.Name)
+        if espPart then
+            espPart:Destroy()
+        end
+    end
+end)
